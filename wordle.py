@@ -1,18 +1,27 @@
-from spellchecker import SpellChecker
+words = {}
+with open('list.txt') as f:
+    for l in f:
+        if l:
+            words[l.strip()] = True
 
-spell = SpellChecker()
-
-# the alphabet. i assume repeats are possible
+# the alphabet. i assume repeats are possible?
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
 'W', 'X', 'Y', 'Z']
 
+exclude = {
+    'Q': True,
+    'U': True,
+    'I': True,
+    'E': True,
+}
 # known letters, the yellow ones,
 # the '#' is a wildcard in this case.
-guess = ['#', 'I', 'N', 'E', 'W']
+guess = ['C', 'K', 'H', '#', '#']
 known = {
-    1: 'I',
-    2: 'N',
+    1: 'H',
+    3: 'C',
+    4: 'K',
 }
 # dictionary for uniques. i probably should have used a set
 uniques = {}
@@ -39,8 +48,10 @@ def permute(s, l, alpha, max_length=5):
         else:
             for j in range(len(alpha)):
                 tmp = ''.join(s)
-                newT = tmp.replace('#', alpha[j], 1)
-                permute(toArray(newT), l, alpha[:j] + alpha[j+1:])
+                newT = tmp
+                if j not in exclude:
+                    newT = tmp.replace('#', alpha[j], 1)
+                permute(toArray(newT), l, alpha)
     for i in range(len(l)):
         if len(s) in known:
             letter = known[len(s)]
@@ -58,9 +69,18 @@ def permute(s, l, alpha, max_length=5):
 
 permute([], guess, alphabet)
 u = []
+out = []
 # i could have used a set but it's too late now
 for word in uniques:
     # why didnt i just use lowercase from the beginning lol
-    u.append(word.lower())
-print(spell.known(u))
+    if word.lower() in words:
+        print(word)
+        should_exclude = False
+        for letter in word:
+            if letter.upper() in exclude:
+                should_exclude = True
+                break
+        if not should_exclude:
+            out.append(word)
+print(out)
 exit(0)
